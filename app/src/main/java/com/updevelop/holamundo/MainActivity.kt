@@ -3,10 +3,8 @@ package com.updevelop.holamundo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -22,20 +20,26 @@ import androidx.compose.ui.unit.sp
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             HolaMundoTheme {
                 var mensaje by remember { mutableStateOf("Hola mundo!") }
+                var nombreUsuario by remember { mutableStateOf("") }
 
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        mensaje = mensaje,
-                        modifier = Modifier.padding(innerPadding),
-                        onCambiarClick = {
-                            mensaje = "¡Bienvenido a Up Develop!"
-                        }
-                    )
-                }
+                Greeting(
+                    mensaje = mensaje,
+                    nombreUsuario = nombreUsuario,
+                    onNombreChange = { nombreUsuario = it },
+                    onCambiarClick = {
+                        mensaje = if (nombreUsuario.isNotBlank())
+                            "Hola, $nombreUsuario 👋"
+                        else
+                            "Por favor ingresa tu nombre"
+                    },
+                    onResetClick = {
+                        mensaje = "Hola mundo!"
+                        nombreUsuario = ""
+                    }
+                )
             }
         }
     }
@@ -44,31 +48,59 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Greeting(
     mensaje: String,
-    modifier: Modifier = Modifier,
-    onCambiarClick: () -> Unit
+    nombreUsuario: String,
+    onNombreChange: (String) -> Unit,
+    onCambiarClick: () -> Unit,
+    onResetClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier.padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = mensaje,
-            fontSize = 24.sp
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = onCambiarClick) {
-            Text("Cambiar Mensaje")
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = mensaje,
+                fontSize = 24.sp
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            TextField(
+                value = nombreUsuario,
+                onValueChange = onNombreChange,
+                label = { Text("Ingresa tu nombre") },
+                singleLine = true
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(onClick = onCambiarClick) {
+                Text("Mostrar Saludo")
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(onClick = onResetClick) {
+                Text("Reiniciar")
+            }
         }
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun GreetingPreview() {
     HolaMundoTheme {
         Greeting(
             mensaje = "Hola mundo!",
-            onCambiarClick = {}, // función vacía
+            nombreUsuario = "Sergio",
+            onNombreChange = {},
+            onCambiarClick = {},
+            onResetClick = {}
         )
     }
 }
